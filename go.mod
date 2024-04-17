@@ -4,7 +4,10 @@ module movie-micro
 
 go 1.21.3
 
-require github.com/hashicorp/consul/api v1.28.2
+require (
+	github.com/hashicorp/consul/api v1.28.2
+	google.golang.org/protobuf v1.33.0
+)
 
 require (
 	github.com/armon/go-metrics v0.4.1 // indirect
