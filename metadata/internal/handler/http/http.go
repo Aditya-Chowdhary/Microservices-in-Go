@@ -6,8 +6,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/Aditya-Chowdhary/microservices-go/metadata/internal/controller/metadata"
-	"github.com/Aditya-Chowdhary/microservices-go/metadata/internal/repository"
+	"movie-micro/metadata/internal/controller/metadata"
+	"movie-micro/metadata/internal/repository"
 )
 
 type Handler struct {

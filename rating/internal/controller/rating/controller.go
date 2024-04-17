@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/Aditya-Chowdhary/microservices-go/rating/internal/repository"
-	"github.com/Aditya-Chowdhary/microservices-go/rating/pkg/model"
+	"movie-micro/rating/internal/repository"
+	"movie-micro/rating/pkg/model"
 )
 
 // ErrNotFound is returned when no ratings are found for a record
@@ -35,7 +35,7 @@ func (c *Controller) GetAggregatedRating(ctx context.Context, recordID model.Rec
 		return 0, err
 	}
 
-	sum := float64(0) 
+	sum := float64(0)
 	for _, r := range ratings {
 		sum += float64(r.Value)
 	}
@@ -47,4 +47,3 @@ func (c *Controller) GetAggregatedRating(ctx context.Context, recordID model.Rec
 func (c *Controller) PutRating(ctx context.Context, recordID model.RecordID, recordType model.RecordType, rating *model.Rating) error {
 	return c.repo.Put(ctx, recordID, recordType, rating)
 }
-

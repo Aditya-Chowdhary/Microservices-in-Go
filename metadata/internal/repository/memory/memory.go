@@ -4,8 +4,8 @@ import (
 	"context"
 	"sync"
 
-	"github.com/Aditya-Chowdhary/microservices-go/metadata/internal/repository"
-	"github.com/Aditya-Chowdhary/microservices-go/metadata/pkg/model"
+	"movie-micro/metadata/internal/repository"
+	"movie-micro/metadata/pkg/model"
 )
 
 type Repository struct {

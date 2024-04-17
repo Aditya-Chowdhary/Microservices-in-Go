@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/Aditya-Chowdhary/microservices-go/metadata/internal/repository"
-	"github.com/Aditya-Chowdhary/microservices-go/metadata/pkg/model"
+	"movie-micro/metadata/internal/repository"
+	"movie-micro/metadata/pkg/model"
 )
 
 var ErrNotFound = errors.New("not found")

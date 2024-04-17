@@ -4,9 +4,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/Aditya-Chowdhary/microservices-go/rating/internal/controller/rating"
-	httphandler "github.com/Aditya-Chowdhary/microservices-go/rating/internal/handler/http"
-	"github.com/Aditya-Chowdhary/microservices-go/rating/internal/repository/memory"
+	"movie-micro/rating/internal/controller/rating"
+	httphandler "movie-micro/rating/internal/handler/http"
+	"movie-micro/rating/internal/repository/memory"
 )
 
 func main() {

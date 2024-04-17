@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/Aditya-Chowdhary/microservices-go/rating/internal/controller/rating"
-	"github.com/Aditya-Chowdhary/microservices-go/rating/pkg/model"
+	"movie-micro/rating/internal/controller/rating"
+	"movie-micro/rating/pkg/model"
 )
 
 // Handler defines a rating service conroller

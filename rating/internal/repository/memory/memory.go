@@ -3,8 +3,8 @@ package memory
 import (
 	"context"
 
-	"github.com/Aditya-Chowdhary/microservices-go/rating/internal/repository"
-	"github.com/Aditya-Chowdhary/microservices-go/rating/pkg/model"
+	"movie-micro/rating/internal/repository"
+	"movie-micro/rating/pkg/model"
 )
 
 type Repository struct {
