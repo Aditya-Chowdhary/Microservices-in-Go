@@ -5,20 +5,24 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net/http"
+	"net"
 	"time"
 
+	"movie-micro/gen"
 	"movie-micro/metadata/internal/controller/metadata"
-	httphandler "movie-micro/metadata/internal/handler/http"
+	grpchandler "movie-micro/metadata/internal/handler/grpc"
 	"movie-micro/metadata/internal/repository/memory"
 	"movie-micro/pkg/discovery"
 	"movie-micro/pkg/discovery/consul"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 const serviceName = "metadata"
 
 func main() {
-	var port int 
+	var port int
 	flag.IntVar(&port, "port", 8081, "API handler port")
 	flag.Parse()
 
@@ -43,12 +47,19 @@ func main() {
 		}
 	}()
 	defer registry.Deregister(ctx, instanceID, serviceName)
-	
+
 	repo := memory.New()
-	svc := metadata.New(repo)
-	h := httphandler.New(svc)
-	http.Handle("/metadata", http.HandlerFunc(h.GetMetadata))
-	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil); err != nil {
+	ctrl := metadata.New(repo)
+	h := grpchandler.New(ctrl)
+	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%v", port))
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+
+	srv := grpc.NewServer()
+	reflection.Register(srv)
+	gen.RegisterMetadataServiceServer(srv, h)
+	if err := srv.Serve(lis); err != nil {
 		panic(err)
 	}
 }

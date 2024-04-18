@@ -5,14 +5,18 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net/http"
+	"net"
 	"time"
 
+	"movie-micro/gen"
 	"movie-micro/pkg/discovery"
 	"movie-micro/pkg/discovery/consul"
 	"movie-micro/rating/internal/controller/rating"
-	httphandler "movie-micro/rating/internal/handler/http"
+	grpchandler "movie-micro/rating/internal/handler/grpc"
 	"movie-micro/rating/internal/repository/memory"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 const serviceName = "rating"
@@ -45,10 +49,17 @@ func main() {
 	defer registry.Deregister(ctx, instanceID, serviceName)
 
 	repo := memory.New()
-	svc := rating.New(repo)
-	h := httphandler.New(svc)
-	http.Handle("/rating", http.HandlerFunc(h.Handle))
-	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil); err != nil {
+	ctrl := rating.New(repo)
+	h := grpchandler.New(ctrl)
+	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%v", port))
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+
+	srv := grpc.NewServer()
+	reflection.Register(srv)
+	gen.RegisterRatingServiceServer(srv, h)
+	if err := srv.Serve(lis); err != nil {
 		panic(err)
 	}
 }
