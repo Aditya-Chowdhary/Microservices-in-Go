@@ -9,7 +9,7 @@ message Metadata {
 }
 
 message MovieDetails {
-    float rating = 1;
+    double rating = 1;
     Metadata metadata = 2;
 }
 
