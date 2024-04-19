@@ -6,7 +6,6 @@ import (
 	"log"
 	"net"
 	"os"
-	"time"
 
 	"movie-micro/gen"
 	"movie-micro/movie/internal/controller/movie"
@@ -14,7 +13,7 @@ import (
 	ratinggateway "movie-micro/movie/internal/gateway/rating/http"
 	grpchandler "movie-micro/movie/internal/handler/grpc"
 	"movie-micro/pkg/discovery"
-	"movie-micro/pkg/discovery/consul"
+	"movie-micro/pkg/discovery/memory"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -36,27 +35,48 @@ func main() {
 
 	log.Printf("Starting the movie service on port %d", port)
 
-	registry, err := consul.NewRegistry("localhost:8500")
-	if err != nil {
-		panic(err)
-	}
+	// ! Code for using consul service registry
+	/* 
+	// registry, err := consul.NewRegistry("localhost:8500")
+	// if err != nil {
+	// 	panic(err)
+	// }
 
+	// ctx := context.Background()
+	// instanceID := discovery.GenerateInstanceID(serviceName)
+	// if err := registry.Register(ctx, instanceID, serviceName, fmt.Sprintf("localhost:%d", port)); err != nil {
+	// 	panic(err)
+	// }
+
+	// go func() {
+	// 	for {
+	// 		if err := registry.ReportHealthyState(instanceID, serviceName); err != nil {
+	// 			log.Println("Failed to report healthy state: " + err.Error())
+	// 		}
+	// 		time.Sleep(1 * time.Second)
+	// 	}
+	// }()
+	// defer registry.Deregister(ctx, instanceID, serviceName) */
+
+	// ! Code for using memory service registry
+	registry := memory.NewRegistry()
 	ctx := context.Background()
-	instanceID := discovery.GenerateInstanceID(serviceName)
-	if err := registry.Register(ctx, instanceID, serviceName, fmt.Sprintf("localhost:%d", port)); err != nil {
+	metadatainstanceID := discovery.GenerateInstanceID(serviceName)
+	if err := registry.Register(ctx, metadatainstanceID, "movie","localhost:8081"); err != nil {
 		panic(err)
 	}
+	ratinginstanceID := discovery.GenerateInstanceID(serviceName)
+	if err := registry.Register(ctx, ratinginstanceID, "movie","localhost:8082"); err != nil {
+		panic(err)
+	}
+	movieinstanceID := discovery.GenerateInstanceID(serviceName)
+	if err := registry.Register(ctx, movieinstanceID, "movie","localhost:8083"); err != nil {
+		panic(err)
+	}
+	defer registry.Deregister(ctx, movieinstanceID,"movie")
 
-	go func() {
-		for {
-			if err := registry.ReportHealthyState(instanceID, serviceName); err != nil {
-				log.Println("Failed to report healthy state: " + err.Error())
-			}
-			time.Sleep(1 * time.Second)
-		}
-	}()
-	defer registry.Deregister(ctx, instanceID, serviceName)
 
+	// ! Unchanged
 	metadataGateway := metadatagateway.New(registry)
 	ratingGateway := ratinggateway.New(registry)
 	ctrl := movie.New(ratingGateway, metadataGateway)

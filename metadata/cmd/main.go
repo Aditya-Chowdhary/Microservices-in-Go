@@ -1,19 +1,15 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net"
 	"os"
-	"time"
 
 	"movie-micro/gen"
 	"movie-micro/metadata/internal/controller/metadata"
 	grpchandler "movie-micro/metadata/internal/handler/grpc"
 	"movie-micro/metadata/internal/repository/memory"
-	"movie-micro/pkg/discovery"
-	"movie-micro/pkg/discovery/consul"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -35,26 +31,29 @@ func main() {
 
 	log.Printf("Starting the movie metadata service on port %d", port)
 
-	registry, err := consul.NewRegistry("localhost:8500")
-	if err != nil {
-		panic(err)
-	}
+	// ! Code for using consul service registry
+	/*
+	// registry, err := consul.NewRegistry("localhost:8500")
+	// if err != nil {
+	// 	panic(err)
+	// }
 
-	ctx := context.Background()
-	instanceID := discovery.GenerateInstanceID(serviceName)
-	if err := registry.Register(ctx, instanceID, serviceName, fmt.Sprintf("localhost:%d", port)); err != nil {
-		panic(err)
-	}
+	// ctx := context.Background()
+	// instanceID := discovery.GenerateInstanceID(serviceName)
+	// if err := registry.Register(ctx, instanceID, serviceName, fmt.Sprintf("localhost:%d", port)); err != nil {
+	// 	panic(err)
+	// }
 
-	go func() {
-		for {
-			if err := registry.ReportHealthyState(instanceID, serviceName); err != nil {
-				log.Println("Failed to report healthy state: " + err.Error())
-			}
-			time.Sleep(1 * time.Second)
-		}
-	}()
-	defer registry.Deregister(ctx, instanceID, serviceName)
+	// go func() {
+	// 	for {
+	// 		if err := registry.ReportHealthyState(instanceID, serviceName); err != nil {
+	// 			log.Println("Failed to report healthy state: " + err.Error())
+	// 		}
+	// 		time.Sleep(1 * time.Second)
+	// 	}
+	// }()
+	// defer registry.Deregister(ctx, instanceID, serviceName)
+	*/
 
 	repo := memory.New()
 	ctrl := metadata.New(repo)
