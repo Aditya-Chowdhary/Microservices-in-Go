@@ -9,3 +9,19 @@ db/create:
 
 db/schema:
 	@docker exec -i movieexample_db mysql movieexample -h 0.0.0.0 -P 3306 --protocol=tcp -uroot -ppassword < schema/schema.sql
+
+SERVICES=metadata rating movie
+
+build/all:
+	@for service in $(SERVICES); do \
+		cd $$service && pwd && \
+		GOOS=linux go build -o main cmd/main.go cmd/config.go && \
+		cd ..; \
+	done
+
+docker/image:
+	@for service in $(SERVICES); do \
+		cd $$service && pwd && \
+		docker build -t $$service . && \
+		cd ..; \
+	done
