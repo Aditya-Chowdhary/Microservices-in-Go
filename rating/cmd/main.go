@@ -1,10 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net"
 	"os"
+	"os/signal"
+	"sync"
+	"syscall"
 
 	"movie-micro/gen"
 	"movie-micro/rating/internal/controller/rating"
@@ -33,27 +37,29 @@ func main() {
 
 	// ! Code for using consul service registry
 	/*
-	// registry, err := consul.NewRegistry("localhost:8500")
-	// if err != nil {
-	// 	panic(err)
-	// }
+		// registry, err := consul.NewRegistry("localhost:8500")
+		// if err != nil {
+		// 	panic(err)
+		// }
 
-	// ctx := context.Background()
-	// instanceID := discovery.GenerateInstanceID(serviceName)
-	// if err := registry.Register(ctx, instanceID, serviceName, fmt.Sprintf("localhost:%d", port)); err != nil {
-	// 	panic(err)
-	// }
+		// ctx := context.Background()
+		// instanceID := discovery.GenerateInstanceID(serviceName)
+		// if err := registry.Register(ctx, instanceID, serviceName, fmt.Sprintf("localhost:%d", port)); err != nil {
+		// 	panic(err)
+		// }
 
-	// go func() {
-	// 	for {
-	// 		if err := registry.ReportHealthyState(instanceID, serviceName); err != nil {
-	// 			log.Println("Failed to report healthy state: " + err.Error())
-	// 		}
-	// 		time.Sleep(1 * time.Second)
-	// 	}
-	// }()
-	// defer registry.Deregister(ctx, instanceID, serviceName)
+		// go func() {
+		// 	for {
+		// 		if err := registry.ReportHealthyState(instanceID, serviceName); err != nil {
+		// 			log.Println("Failed to report healthy state: " + err.Error())
+		// 		}
+		// 		time.Sleep(1 * time.Second)
+		// 	}
+		// }()
+		// defer registry.Deregister(ctx, instanceID, serviceName)
 	*/
+
+	_, cancel := context.WithCancel(context.Background())
 
 	repo, err := mysql.New()
 	if err != nil {
@@ -69,7 +75,21 @@ func main() {
 	srv := grpc.NewServer()
 	reflection.Register(srv)
 	gen.RegisterRatingServiceServer(srv, h)
+
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		s := <-sigChan
+		cancel()
+		log.Printf("Received signal %v, attempting graceful shutdown\n", s)
+		srv.GracefulStop()
+		log.Println("Gracefully stopped the gRPC server")
+	}()
 	if err := srv.Serve(lis); err != nil {
 		panic(err)
 	}
+	wg.Wait()
 }

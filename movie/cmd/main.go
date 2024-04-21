@@ -15,12 +15,26 @@ import (
 	"movie-micro/pkg/discovery"
 	"movie-micro/pkg/discovery/memory"
 
+	"github.com/grpc-ecosystem/go-grpc-middleware/ratelimit"
+	"golang.org/x/time/rate"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"gopkg.in/yaml.v3"
 )
 
 const serviceName = "movie"
+
+type limiter struct {
+	l *rate.Limiter
+}
+
+func newLimiter(limit, burst int) *limiter {
+	return &limiter{rate.NewLimiter(rate.Limit(limit), burst)}
+}
+
+func (l *limiter) Limit() bool {
+	return l.l.Allow()
+}
 
 func main() {
 	f, err := os.Open("base.yaml")
@@ -36,45 +50,44 @@ func main() {
 	log.Printf("Starting the movie service on port %d", port)
 
 	// ! Code for using consul service registry
-	/* 
-	// registry, err := consul.NewRegistry("localhost:8500")
-	// if err != nil {
-	// 	panic(err)
-	// }
+	/*
+		// registry, err := consul.NewRegistry("localhost:8500")
+		// if err != nil {
+		// 	panic(err)
+		// }
 
-	// ctx := context.Background()
-	// instanceID := discovery.GenerateInstanceID(serviceName)
-	// if err := registry.Register(ctx, instanceID, serviceName, fmt.Sprintf("localhost:%d", port)); err != nil {
-	// 	panic(err)
-	// }
+		// ctx := context.Background()
+		// instanceID := discovery.GenerateInstanceID(serviceName)
+		// if err := registry.Register(ctx, instanceID, serviceName, fmt.Sprintf("localhost:%d", port)); err != nil {
+		// 	panic(err)
+		// }
 
-	// go func() {
-	// 	for {
-	// 		if err := registry.ReportHealthyState(instanceID, serviceName); err != nil {
-	// 			log.Println("Failed to report healthy state: " + err.Error())
-	// 		}
-	// 		time.Sleep(1 * time.Second)
-	// 	}
-	// }()
-	// defer registry.Deregister(ctx, instanceID, serviceName) */
+		// go func() {
+		// 	for {
+		// 		if err := registry.ReportHealthyState(instanceID, serviceName); err != nil {
+		// 			log.Println("Failed to report healthy state: " + err.Error())
+		// 		}
+		// 		time.Sleep(1 * time.Second)
+		// 	}
+		// }()
+		// defer registry.Deregister(ctx, instanceID, serviceName) */
 
 	// ! Code for using memory service registry
 	registry := memory.NewRegistry()
 	ctx := context.Background()
 	metadatainstanceID := discovery.GenerateInstanceID(serviceName)
-	if err := registry.Register(ctx, metadatainstanceID, "movie","localhost:8081"); err != nil {
+	if err := registry.Register(ctx, metadatainstanceID, "movie", "localhost:8081"); err != nil {
 		panic(err)
 	}
 	ratinginstanceID := discovery.GenerateInstanceID(serviceName)
-	if err := registry.Register(ctx, ratinginstanceID, "movie","localhost:8082"); err != nil {
+	if err := registry.Register(ctx, ratinginstanceID, "movie", "localhost:8082"); err != nil {
 		panic(err)
 	}
 	movieinstanceID := discovery.GenerateInstanceID(serviceName)
-	if err := registry.Register(ctx, movieinstanceID, "movie","localhost:8083"); err != nil {
+	if err := registry.Register(ctx, movieinstanceID, "movie", "localhost:8083"); err != nil {
 		panic(err)
 	}
-	defer registry.Deregister(ctx, movieinstanceID,"movie")
-
+	defer registry.Deregister(ctx, movieinstanceID, "movie")
 
 	// ! Unchanged
 	metadataGateway := metadatagateway.New(registry)
@@ -87,7 +100,10 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	srv := grpc.NewServer()
+	const limit = 100
+	const burst = 100
+	l := newLimiter(100, 100)
+	srv := grpc.NewServer(grpc.UnaryInterceptor(ratelimit.UnaryServerInterceptor(l)))
 	reflection.Register(srv)
 	gen.RegisterMovieServiceServer(srv, h)
 	if err := srv.Serve(lis); err != nil {
