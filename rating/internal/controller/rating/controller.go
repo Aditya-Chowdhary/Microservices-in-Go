@@ -20,7 +20,6 @@ type ratingIngester interface {
 	Ingest(ctx context.Context) (chan model.RatingEvent, error)
 }
 
-
 // Controller defines a rating service controler
 type Controller struct {
 	repo     ratingRepository

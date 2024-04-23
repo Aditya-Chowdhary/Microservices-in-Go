@@ -3,8 +3,8 @@ package testutil
 import (
 	"movie-micro/gen"
 	"movie-micro/rating/internal/controller/rating"
-	"movie-micro/rating/internal/repository/memory"
 	grpchandler "movie-micro/rating/internal/handler/grpc"
+	"movie-micro/rating/internal/repository/memory"
 )
 
 // NewTestRatingGRPCServer creates a new rating gRPC server for tests
