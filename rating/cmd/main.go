@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"sync"
@@ -18,6 +19,8 @@ import (
 	grpchandler "movie-micro/rating/internal/handler/grpc"
 	"movie-micro/rating/internal/repository/memory"
 
+	"github.com/uber-go/tally"
+	"github.com/uber-go/tally/prometheus"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/propagation"
@@ -48,6 +51,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	// ! Code for using Jaeger Tracing
 	tp, err := tracing.NewJaegerProvider(cfg.Jaeger.URL, serviceName)
 	if err != nil {
 		logger.Fatal("Failed to initialize Jaeger provider", zap.Error(err))
@@ -59,6 +63,27 @@ func main() {
 	}()
 	otel.SetTracerProvider(tp)
 	otel.SetTextMapPropagator(propagation.TraceContext{})
+
+	// ! Code for prometheus reporting
+	reporter := prometheus.NewReporter(prometheus.Options{})
+	scope, closer := tally.NewRootScope(tally.ScopeOptions{
+		Tags:                   map[string]string{"service": "rating"},
+		CachedReporter:         reporter,
+		OmitCardinalityMetrics: true,
+	}, 10*time.Second)
+	defer closer.Close()
+
+	http.Handle("/metrics", reporter.HTTPHandler())
+	go func() {
+		if err := http.ListenAndServe(fmt.Sprintf(":%d", cfg.Prometheus.MetricsPort), nil); err != nil {
+			logger.Fatal("Failed to start the metrics handler", zap.Error(err))
+		}
+	}()
+
+	counter := scope.Tagged(map[string]string{
+		"service": "rating",
+	}).Counter("service_started")
+	counter.Inc(1)
 
 	// ! Code for using consul service registry
 

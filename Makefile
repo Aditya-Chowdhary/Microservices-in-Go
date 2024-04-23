@@ -23,6 +23,13 @@ jaeger:
  	-p 9411:9411 \
  	jaegertracing/all-in-one:1.37;
 
+## prometheus: Runs docker container for Prometheus
+prometheus:
+	@docker run -d --rm --name prometheus \
+	-p 9090:9090 \
+	-v configs:/etc/prometheus \
+	prom/prometheus
+
 ## db/create: Creates and runs docker container for mysql db
 db/create:
 	@docker run --name movieexample_db -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=movieexample -p 3306:3306 -d mysql:latest
