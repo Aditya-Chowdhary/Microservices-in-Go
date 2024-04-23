@@ -10,7 +10,11 @@ import (
 	"movie-micro/metadata/internal/controller/metadata"
 	grpchandler "movie-micro/metadata/internal/handler/grpc"
 	"movie-micro/metadata/internal/repository/memory"
+	"movie-micro/pkg/tracing"
 
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"gopkg.in/yaml.v3"
@@ -30,29 +34,41 @@ func main() {
 	port := cfg.API.Port
 
 	log.Printf("Starting the movie metadata service on port %d", port)
+	tp, err := tracing.NewJaegerProvider(cfg.Jaeger.URL,
+		serviceName)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() {
+		if err := tp.Shutdown(ctx); err != nil {
+			log.Fatal(err)
+		}
+	}()
+	otel.SetTracerProvider(tp)
+	otel.SetTextMapPropagator(propagation.TraceContext{})
 
 	// ! Code for using consul service registry
 	/*
-	// registry, err := consul.NewRegistry("localhost:8500")
-	// if err != nil {
-	// 	panic(err)
-	// }
+		// registry, err := consul.NewRegistry("localhost:8500")
+		// if err != nil {
+		// 	panic(err)
+		// }
 
-	// ctx := context.Background()
-	// instanceID := discovery.GenerateInstanceID(serviceName)
-	// if err := registry.Register(ctx, instanceID, serviceName, fmt.Sprintf("localhost:%d", port)); err != nil {
-	// 	panic(err)
-	// }
+		// ctx := context.Background()
+		// instanceID := discovery.GenerateInstanceID(serviceName)
+		// if err := registry.Register(ctx, instanceID, serviceName, fmt.Sprintf("localhost:%d", port)); err != nil {
+		// 	panic(err)
+		// }
 
-	// go func() {
-	// 	for {
-	// 		if err := registry.ReportHealthyState(instanceID, serviceName); err != nil {
-	// 			log.Println("Failed to report healthy state: " + err.Error())
-	// 		}
-	// 		time.Sleep(1 * time.Second)
-	// 	}
-	// }()
-	// defer registry.Deregister(ctx, instanceID, serviceName)
+		// go func() {
+		// 	for {
+		// 		if err := registry.ReportHealthyState(instanceID, serviceName); err != nil {
+		// 			log.Println("Failed to report healthy state: " + err.Error())
+		// 		}
+		// 		time.Sleep(1 * time.Second)
+		// 	}
+		// }()
+		// defer registry.Deregister(ctx, instanceID, serviceName)
 	*/
 
 	repo := memory.New()
@@ -63,7 +79,7 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	srv := grpc.NewServer()
+	srv := grpc.NewServer(grpc.StatsHandler(otelgrpc.NewServerHandler()))
 	reflection.Register(srv)
 	gen.RegisterMetadataServiceServer(srv, h)
 	if err := srv.Serve(lis); err != nil {

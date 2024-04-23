@@ -14,8 +14,12 @@ import (
 	grpchandler "movie-micro/movie/internal/handler/grpc"
 	"movie-micro/pkg/discovery"
 	"movie-micro/pkg/discovery/memory"
+	"movie-micro/pkg/tracing"
 
 	"github.com/grpc-ecosystem/go-grpc-middleware/ratelimit"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
 	"golang.org/x/time/rate"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -48,6 +52,18 @@ func main() {
 	port := cfg.API.Port
 
 	log.Printf("Starting the movie service on port %d", port)
+	tp, err := tracing.NewJaegerProvider(cfg.Jaeger.URL,
+		serviceName)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() {
+		if err := tp.Shutdown(ctx); err != nil {
+			log.Fatal(err)
+		}
+	}()
+	otel.SetTracerProvider(tp)
+	otel.SetTextMapPropagator(propagation.TraceContext{})
 
 	// ! Code for using consul service registry
 	/*
@@ -103,7 +119,7 @@ func main() {
 	const limit = 100
 	const burst = 100
 	l := newLimiter(100, 100)
-	srv := grpc.NewServer(grpc.UnaryInterceptor(ratelimit.UnaryServerInterceptor(l)))
+	srv := grpc.NewServer(grpc.UnaryInterceptor(ratelimit.UnaryServerInterceptor(l)), grpc.StatsHandler(otelgrpc.NewServerHandler()))
 	reflection.Register(srv)
 	gen.RegisterMovieServiceServer(srv, h)
 	if err := srv.Serve(lis); err != nil {

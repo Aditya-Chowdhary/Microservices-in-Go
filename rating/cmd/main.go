@@ -11,10 +11,14 @@ import (
 	"syscall"
 
 	"movie-micro/gen"
+	"movie-micro/pkg/tracing"
 	"movie-micro/rating/internal/controller/rating"
 	grpchandler "movie-micro/rating/internal/handler/grpc"
 	"movie-micro/rating/internal/repository/mysql"
 
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"gopkg.in/yaml.v3"
@@ -34,6 +38,18 @@ func main() {
 	port := cfg.API.Port
 
 	log.Printf("Starting the rating metadata service on port %d", port)
+	tp, err := tracing.NewJaegerProvider(cfg.Jaeger.URL,
+		serviceName)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() {
+		if err := tp.Shutdown(ctx); err != nil {
+			log.Fatal(err)
+		}
+	}()
+	otel.SetTracerProvider(tp)
+	otel.SetTextMapPropagator(propagation.TraceContext{})
 
 	// ! Code for using consul service registry
 	/*
@@ -72,7 +88,7 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	srv := grpc.NewServer()
+	srv := grpc.NewServer(grpc.StatsHandler(otelgrpc.NewServerHandler()))
 	reflection.Register(srv)
 	gen.RegisterRatingServiceServer(srv, h)
 

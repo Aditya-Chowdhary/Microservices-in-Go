@@ -22,7 +22,7 @@ func main() {
 	const fileName = "ratingsdata.json"
 	fmt.Println("Reading rating events from file " + fileName)
 
-	ratingEvents, err := readRatingEvents(fileName) 
+	ratingEvents, err := readRatingEvents(fileName)
 	if err != nil {
 		panic(err)
 	}
@@ -61,7 +61,7 @@ func produceRatingEvents(topic string, producer *kafka.Producer, ratingEvents []
 
 		if err := producer.Produce(&kafka.Message{
 			TopicPartition: kafka.TopicPartition{
-				Topic: &topic,
+				Topic:     &topic,
 				Partition: kafka.PartitionAny,
 			},
 			Value: []byte(encodedEvent),
