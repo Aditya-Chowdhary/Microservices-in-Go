@@ -19,6 +19,9 @@ func (r *Repository) Get(ctx context.Context, recordID model.RecordID, recordTyp
 	if _, ok := r.data[recordType]; !ok {
 		return nil, repository.ErrNotFound
 	}
+	if ratings, ok := r.data[recordType][recordID]; !ok || len(ratings) == 0 {
+		return nil, repository.ErrNotFound
+	}
 	return r.data[recordType][recordID], nil
 }
 

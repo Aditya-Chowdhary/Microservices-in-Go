@@ -3,8 +3,8 @@ package testutil
 import (
 	"movie-micro/gen"
 	"movie-micro/metadata/internal/controller/metadata"
-	"movie-micro/metadata/internal/repository/memory"
 	grpchandler "movie-micro/metadata/internal/handler/grpc"
+	"movie-micro/metadata/internal/repository/memory"
 )
 
 // NewTestMetadataGRPCServer creates a new metadata gRPC server for tests

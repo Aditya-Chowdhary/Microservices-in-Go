@@ -27,12 +27,12 @@ func main() {
 		panic(err)
 	}
 
-	const topic = "ratings"
+	var topic = "ratings"
 	if err := produceRatingEvents(topic, producer, ratingEvents); err != nil {
 		panic(err)
 	}
 
-	const timeout = 10 * time.Second
+	var timeout = 10 * time.Second
 	fmt.Println("Waiting " + timeout.String() + " until all events get produced")
 
 	producer.Flush(int(timeout.Milliseconds()))

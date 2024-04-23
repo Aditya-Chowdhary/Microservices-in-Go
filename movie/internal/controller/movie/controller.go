@@ -7,6 +7,7 @@ import (
 	"movie-micro/movie/internal/gateway"
 	"movie-micro/movie/pkg/model"
 	ratingmodel "movie-micro/rating/pkg/model"
+	"sync"
 )
 
 var ErrNotFound = errors.New("movie metadata not found")
@@ -36,16 +37,30 @@ func New(ratingGateway ratingGateway, metametadataGateway metadataGateway) *Cont
 
 // Get returns the movies details including the aggregated rating and movie metadata
 func (c *Controller) Get(ctx context.Context, id string) (*model.MovieDetails, error) {
-	metadata, err := c.metadataGateway.Get(ctx, id)
-	if err != nil && errors.Is(err, gateway.ErrNotFound) {
+	var wg sync.WaitGroup
+	wg.Add(2)
+	var metadata *metadatamodel.Metadata
+	var getMetadataErr error
+	var rating float64
+	var getRatingErr error
+	go func() {
+		defer wg.Done()
+		metadata, getMetadataErr = c.metadataGateway.Get(ctx, id)
+	}()
+	go func() {
+		defer wg.Done()
+		rating, getRatingErr = c.ratingGateway.GetAggregatedRating(ctx, ratingmodel.RecordID(id), ratingmodel.RecordTypeMovie)
+	}()
+	wg.Wait()
+
+	if err := getMetadataErr; err != nil && errors.Is(err, gateway.ErrNotFound) {
 		return nil, ErrNotFound
 	} else if err != nil {
 		return nil, err
 	}
 
 	details := &model.MovieDetails{Metadata: *metadata}
-	rating, err := c.ratingGateway.GetAggregatedRating(ctx, ratingmodel.RecordID(id), ratingmodel.RecordTypeMovie)
-	if err != nil && !errors.Is(err, gateway.ErrNotFound) {
+	if err := getRatingErr; err != nil && !errors.Is(err, gateway.ErrNotFound) {
 		// Proceed. It is ok to not have ratings
 	} else if err != nil {
 		return nil, err

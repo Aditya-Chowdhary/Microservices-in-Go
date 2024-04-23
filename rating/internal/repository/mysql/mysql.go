@@ -23,7 +23,7 @@ func New() (*Repository, error) {
 	return &Repository{db}, nil
 }
 
-// Get retrieves all ratings for a given record 
+// Get retrieves all ratings for a given record
 func (r *Repository) Get(ctx context.Context, recordID model.RecordID, recordType model.RecordType) ([]model.Rating, error) {
 	query := "SELECT user_id, value FROM ratings WHERE record_id = ? AND record_type = ?"
 
@@ -37,14 +37,14 @@ func (r *Repository) Get(ctx context.Context, recordID model.RecordID, recordTyp
 	for rows.Next() {
 		var (
 			user_id string
-			value int32
+			value   int32
 		)
-		if err := rows.Scan(&user_id, &value); err != nil{
+		if err := rows.Scan(&user_id, &value); err != nil {
 			return nil, err
 		}
 		res = append(res, model.Rating{
 			UserID: model.UserID(user_id),
-			Value: model.RatingValue(value),
+			Value:  model.RatingValue(value),
 		})
 	}
 	if len(res) == 0 {

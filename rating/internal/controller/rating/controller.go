@@ -16,6 +16,11 @@ type ratingRepository interface {
 	Put(ctx context.Context, recordID model.RecordID, recordType model.RecordType, rating *model.Rating) error
 }
 
+type ratingIngester interface {
+	Ingest(ctx context.Context) (chan model.RatingEvent, error)
+}
+
+
 // Controller defines a rating service controler
 type Controller struct {
 	repo     ratingRepository
@@ -47,10 +52,6 @@ func (c *Controller) GetAggregatedRating(ctx context.Context, recordID model.Rec
 // PutRating writes a rating for a given record
 func (c *Controller) PutRating(ctx context.Context, recordID model.RecordID, recordType model.RecordType, rating *model.Rating) error {
 	return c.repo.Put(ctx, recordID, recordType, rating)
-}
-
-type ratingIngester interface {
-	Ingest(ctx context.Context) (chan model.RatingEvent, error)
 }
 
 // StartIngestion starts the ingestion of rating events.

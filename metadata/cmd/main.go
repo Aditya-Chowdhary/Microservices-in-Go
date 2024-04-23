@@ -1,15 +1,19 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net"
 	"os"
+	"time"
 
 	"movie-micro/gen"
 	"movie-micro/metadata/internal/controller/metadata"
 	grpchandler "movie-micro/metadata/internal/handler/grpc"
 	"movie-micro/metadata/internal/repository/memory"
+	"movie-micro/pkg/discovery"
+	"movie-micro/pkg/discovery/consul"
 	"movie-micro/pkg/tracing"
 
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
@@ -23,7 +27,7 @@ import (
 const serviceName = "metadata"
 
 func main() {
-	f, err := os.Open("base.yaml")
+	f, err := os.Open("./configs/base.yaml")
 	if err != nil {
 		panic(err)
 	}
@@ -34,6 +38,10 @@ func main() {
 	port := cfg.API.Port
 
 	log.Printf("Starting the movie metadata service on port %d", port)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	tp, err := tracing.NewJaegerProvider(cfg.Jaeger.URL,
 		serviceName)
 	if err != nil {
@@ -48,28 +56,25 @@ func main() {
 	otel.SetTextMapPropagator(propagation.TraceContext{})
 
 	// ! Code for using consul service registry
-	/*
-		// registry, err := consul.NewRegistry("localhost:8500")
-		// if err != nil {
-		// 	panic(err)
-		// }
+	registry, err := consul.NewRegistry("localhost:8500")
+	if err != nil {
+		panic(err)
+	}
 
-		// ctx := context.Background()
-		// instanceID := discovery.GenerateInstanceID(serviceName)
-		// if err := registry.Register(ctx, instanceID, serviceName, fmt.Sprintf("localhost:%d", port)); err != nil {
-		// 	panic(err)
-		// }
+	instanceID := discovery.GenerateInstanceID(serviceName)
+	if err := registry.Register(ctx, instanceID, serviceName, fmt.Sprintf("localhost:%d", port)); err != nil {
+		panic(err)
+	}
 
-		// go func() {
-		// 	for {
-		// 		if err := registry.ReportHealthyState(instanceID, serviceName); err != nil {
-		// 			log.Println("Failed to report healthy state: " + err.Error())
-		// 		}
-		// 		time.Sleep(1 * time.Second)
-		// 	}
-		// }()
-		// defer registry.Deregister(ctx, instanceID, serviceName)
-	*/
+	go func() {
+		for {
+			if err := registry.ReportHealthyState(instanceID, serviceName); err != nil {
+				log.Println("Failed to report healthy state: " + err.Error())
+			}
+			time.Sleep(1 * time.Second)
+		}
+	}()
+	defer registry.Deregister(ctx, instanceID, serviceName)
 
 	repo := memory.New()
 	ctrl := metadata.New(repo)

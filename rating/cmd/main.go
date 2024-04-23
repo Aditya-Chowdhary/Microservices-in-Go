@@ -9,12 +9,15 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 
 	"movie-micro/gen"
+	"movie-micro/pkg/discovery"
+	"movie-micro/pkg/discovery/consul"
 	"movie-micro/pkg/tracing"
 	"movie-micro/rating/internal/controller/rating"
 	grpchandler "movie-micro/rating/internal/handler/grpc"
-	"movie-micro/rating/internal/repository/mysql"
+	"movie-micro/rating/internal/repository/memory"
 
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
@@ -27,7 +30,7 @@ import (
 const serviceName = "rating"
 
 func main() {
-	f, err := os.Open("base.yaml")
+	f, err := os.Open("./configs/base.yaml")
 	if err != nil {
 		panic(err)
 	}
@@ -38,8 +41,11 @@ func main() {
 	port := cfg.API.Port
 
 	log.Printf("Starting the rating metadata service on port %d", port)
-	tp, err := tracing.NewJaegerProvider(cfg.Jaeger.URL,
-		serviceName)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	tp, err := tracing.NewJaegerProvider(cfg.Jaeger.URL, serviceName)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -52,35 +58,28 @@ func main() {
 	otel.SetTextMapPropagator(propagation.TraceContext{})
 
 	// ! Code for using consul service registry
-	/*
-		// registry, err := consul.NewRegistry("localhost:8500")
-		// if err != nil {
-		// 	panic(err)
-		// }
 
-		// ctx := context.Background()
-		// instanceID := discovery.GenerateInstanceID(serviceName)
-		// if err := registry.Register(ctx, instanceID, serviceName, fmt.Sprintf("localhost:%d", port)); err != nil {
-		// 	panic(err)
-		// }
-
-		// go func() {
-		// 	for {
-		// 		if err := registry.ReportHealthyState(instanceID, serviceName); err != nil {
-		// 			log.Println("Failed to report healthy state: " + err.Error())
-		// 		}
-		// 		time.Sleep(1 * time.Second)
-		// 	}
-		// }()
-		// defer registry.Deregister(ctx, instanceID, serviceName)
-	*/
-
-	_, cancel := context.WithCancel(context.Background())
-
-	repo, err := mysql.New()
+	registry, err := consul.NewRegistry("localhost:8500")
 	if err != nil {
 		panic(err)
 	}
+
+	instanceID := discovery.GenerateInstanceID(serviceName)
+	if err := registry.Register(ctx, instanceID, serviceName, fmt.Sprintf("localhost:%d", port)); err != nil {
+		panic(err)
+	}
+
+	go func() {
+		for {
+			if err := registry.ReportHealthyState(instanceID, serviceName); err != nil {
+				log.Println("Failed to report healthy state: " + err.Error())
+			}
+			time.Sleep(1 * time.Second)
+		}
+	}()
+	defer registry.Deregister(ctx, instanceID, serviceName)
+
+	repo := memory.New()
 	ctrl := rating.New(repo, nil)
 	h := grpchandler.New(ctrl)
 	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%v", port))

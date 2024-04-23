@@ -1,7 +1,7 @@
 package main
 
 type config struct {
-	API apiConfig `yaml:"api"`
+	API    apiConfig    `yaml:"api"`
 	Jaeger jaegerConfig `yaml:"jaeger"`
 }
 

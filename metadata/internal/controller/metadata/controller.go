@@ -11,7 +11,7 @@ import (
 var ErrNotFound = errors.New("not found")
 
 type metadataRepository interface {
-	Get(_ context.Context, id string) (*model.Metadata, error)
+	Get(ctx context.Context, id string) (*model.Metadata, error)
 	Put(ctx context.Context, id string, m *model.Metadata) error
 }
 

@@ -11,7 +11,7 @@ const (
 )
 
 const (
-	RatingEventTypePut = "put"
+	RatingEventTypePut    = "put"
 	RatingEventTypeDelete = "delete"
 )
 
@@ -28,5 +28,6 @@ type RatingEvent struct {
 	RecordID   RecordID        `json:"recordId"`
 	RecordType RecordType      `json:"recordType"`
 	Value      RatingValue     `json:"value"`
+	ProviderID string          `json:"providerID"`
 	EventType  RatingEventType `json:"eventType"`
 }
