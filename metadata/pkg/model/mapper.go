@@ -1,6 +1,6 @@
 package model
 
-import "movie-micro/gen"
+import "github.com/Aditya-Chowdhary/micro-movies/gen"
 
 // MetadataToProto converts a Metadata struct into a generated proto counterpart
 func MetadataToProto(m *Metadata) *gen.Metadata {

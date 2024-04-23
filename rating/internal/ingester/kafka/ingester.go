@@ -4,7 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"movie-micro/rating/pkg/model"
+
+	"github.com/Aditya-Chowdhary/micro-movies/rating/pkg/model"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 )

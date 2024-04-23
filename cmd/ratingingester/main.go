@@ -3,9 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"movie-micro/rating/pkg/model"
 	"os"
 	"time"
+
+	"github.com/Aditya-Chowdhary/micro-movies/rating/pkg/model"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 )

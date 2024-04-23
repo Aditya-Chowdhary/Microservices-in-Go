@@ -3,13 +3,14 @@ package main
 import (
 	"context"
 	"log"
-	"movie-micro/gen"
-	metadatatest "movie-micro/metadata/pkg/testutil"
-	movietest "movie-micro/movie/pkg/testutil"
-	"movie-micro/pkg/discovery"
-	"movie-micro/pkg/discovery/memory"
-	ratingtest "movie-micro/rating/pkg/testutil"
 	"net"
+
+	"github.com/Aditya-Chowdhary/micro-movies/gen"
+	metadatatest "github.com/Aditya-Chowdhary/micro-movies/metadata/pkg/testutil"
+	movietest "github.com/Aditya-Chowdhary/micro-movies/movie/pkg/testutil"
+	"github.com/Aditya-Chowdhary/micro-movies/pkg/discovery"
+	"github.com/Aditya-Chowdhary/micro-movies/pkg/discovery/memory"
+	ratingtest "github.com/Aditya-Chowdhary/micro-movies/rating/pkg/testutil"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"

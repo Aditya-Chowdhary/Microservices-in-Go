@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
-	"movie-micro/movie/internal/gateway"
-	"movie-micro/pkg/discovery"
-	"movie-micro/rating/pkg/model"
 	"net/http"
+
+	"github.com/Aditya-Chowdhary/micro-movies/movie/internal/gateway"
+	"github.com/Aditya-Chowdhary/micro-movies/pkg/discovery"
+	"github.com/Aditya-Chowdhary/micro-movies/rating/pkg/model"
 )
 
 // Gateway defines an HTTP gateway for a rating service

@@ -3,7 +3,8 @@ package grpcutil
 import (
 	"context"
 	"math/rand"
-	"movie-micro/pkg/discovery"
+
+	"github.com/Aditya-Chowdhary/micro-movies/pkg/discovery"
 
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"

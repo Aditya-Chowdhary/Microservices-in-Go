@@ -1,10 +1,10 @@
 package testutil
 
 import (
-	"movie-micro/gen"
-	"movie-micro/metadata/internal/controller/metadata"
-	grpchandler "movie-micro/metadata/internal/handler/grpc"
-	"movie-micro/metadata/internal/repository/memory"
+	"github.com/Aditya-Chowdhary/micro-movies/gen"
+	"github.com/Aditya-Chowdhary/micro-movies/metadata/internal/controller/metadata"
+	grpchandler "github.com/Aditya-Chowdhary/micro-movies/metadata/internal/handler/grpc"
+	"github.com/Aditya-Chowdhary/micro-movies/metadata/internal/repository/memory"
 )
 
 // NewTestMetadataGRPCServer creates a new metadata gRPC server for tests

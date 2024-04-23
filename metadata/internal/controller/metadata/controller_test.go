@@ -3,15 +3,15 @@ package metadata
 import (
 	"context"
 	"errors"
-	"movie-micro/metadata/internal/repository"
-	"movie-micro/metadata/pkg/model"
 	"testing"
 
-	gen "movie-micro/gen/mock/metadata/repository"
+	"github.com/Aditya-Chowdhary/micro-movies/metadata/internal/repository"
+	"github.com/Aditya-Chowdhary/micro-movies/metadata/pkg/model"
+
+	gen "github.com/Aditya-Chowdhary/micro-movies/gen/mock/metadata/repository"
 
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
-	// "github.com/stretchr/testify/assert"
 )
 
 func TestController(t *testing.T) {

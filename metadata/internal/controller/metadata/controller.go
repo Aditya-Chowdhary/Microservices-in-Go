@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"movie-micro/metadata/internal/repository"
-	"movie-micro/metadata/pkg/model"
+	"github.com/Aditya-Chowdhary/micro-movies/metadata/internal/repository"
+	"github.com/Aditya-Chowdhary/micro-movies/metadata/pkg/model"
 )
 
 var ErrNotFound = errors.New("not found")

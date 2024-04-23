@@ -3,9 +3,10 @@ package grpc
 import (
 	"context"
 	"errors"
-	"movie-micro/gen"
-	"movie-micro/rating/internal/controller/rating"
-	"movie-micro/rating/pkg/model"
+
+	"github.com/Aditya-Chowdhary/micro-movies/gen"
+	"github.com/Aditya-Chowdhary/micro-movies/rating/internal/controller/rating"
+	"github.com/Aditya-Chowdhary/micro-movies/rating/pkg/model"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

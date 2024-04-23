@@ -1,6 +1,4 @@
-module movie-micro
-
-// github.com/Aditya-Chowdhary/microservices-go
+module github.com/Aditya-Chowdhary/micro-movies
 
 go 1.21.3
 

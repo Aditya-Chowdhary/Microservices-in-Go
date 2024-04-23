@@ -2,10 +2,11 @@ package grpc
 
 import (
 	"context"
-	"movie-micro/gen"
-	"movie-micro/internal/grpcutil"
-	"movie-micro/metadata/pkg/model"
-	"movie-micro/pkg/discovery"
+
+	"github.com/Aditya-Chowdhary/micro-movies/gen"
+	"github.com/Aditya-Chowdhary/micro-movies/internal/grpcutil"
+	"github.com/Aditya-Chowdhary/micro-movies/metadata/pkg/model"
+	"github.com/Aditya-Chowdhary/micro-movies/pkg/discovery"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

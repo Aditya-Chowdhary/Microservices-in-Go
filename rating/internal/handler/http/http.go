@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"movie-micro/rating/internal/controller/rating"
-	"movie-micro/rating/pkg/model"
+	"github.com/Aditya-Chowdhary/micro-movies/rating/internal/controller/rating"
+	"github.com/Aditya-Chowdhary/micro-movies/rating/pkg/model"
 )
 
 // Handler defines a rating service conroller

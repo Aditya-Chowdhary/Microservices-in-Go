@@ -1,12 +1,12 @@
 package testutil
 
 import (
-	"movie-micro/gen"
-	"movie-micro/movie/internal/controller/movie"
-	metadatagateway "movie-micro/movie/internal/gateway/metadata/grpc"
-	ratinggateway "movie-micro/movie/internal/gateway/rating/grpc"
-	grpchandler "movie-micro/movie/internal/handler/grpc"
-	"movie-micro/pkg/discovery"
+	"github.com/Aditya-Chowdhary/micro-movies/gen"
+	"github.com/Aditya-Chowdhary/micro-movies/movie/internal/controller/movie"
+	metadatagateway "github.com/Aditya-Chowdhary/micro-movies/movie/internal/gateway/metadata/grpc"
+	ratinggateway "github.com/Aditya-Chowdhary/micro-movies/movie/internal/gateway/rating/grpc"
+	grpchandler "github.com/Aditya-Chowdhary/micro-movies/movie/internal/handler/grpc"
+	"github.com/Aditya-Chowdhary/micro-movies/pkg/discovery"
 )
 
 // NewTestMovieGRPCServer creates a new movie gRPC server for tests

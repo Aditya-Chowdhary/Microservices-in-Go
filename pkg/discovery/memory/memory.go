@@ -3,9 +3,10 @@ package memory
 import (
 	"context"
 	"errors"
-	"movie-micro/pkg/discovery"
 	"sync"
 	"time"
+
+	"github.com/Aditya-Chowdhary/micro-movies/pkg/discovery"
 )
 
 type Registry struct {

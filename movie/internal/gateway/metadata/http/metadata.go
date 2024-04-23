@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
-	"movie-micro/metadata/pkg/model"
-	"movie-micro/movie/internal/gateway"
-	"movie-micro/pkg/discovery"
 	"net/http"
+
+	"github.com/Aditya-Chowdhary/micro-movies/metadata/pkg/model"
+	"github.com/Aditya-Chowdhary/micro-movies/movie/internal/gateway"
+	"github.com/Aditya-Chowdhary/micro-movies/pkg/discovery"
 )
 
 // Gateway defines a movie metadata HTTP gateway

@@ -4,8 +4,8 @@ import (
 	"context"
 	"sync"
 
-	"movie-micro/metadata/internal/repository"
-	"movie-micro/metadata/pkg/model"
+	"github.com/Aditya-Chowdhary/micro-movies/metadata/internal/repository"
+	"github.com/Aditya-Chowdhary/micro-movies/metadata/pkg/model"
 
 	"go.opentelemetry.io/otel"
 )

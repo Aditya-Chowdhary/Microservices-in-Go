@@ -6,8 +6,8 @@ import (
 	"log"
 	"net/http"
 
-	"movie-micro/metadata/internal/controller/metadata"
-	"movie-micro/metadata/internal/repository"
+	"github.com/Aditya-Chowdhary/micro-movies/metadata/internal/controller/metadata"
+	"github.com/Aditya-Chowdhary/micro-movies/metadata/internal/repository"
 )
 
 type Handler struct {

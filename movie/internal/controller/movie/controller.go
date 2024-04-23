@@ -3,11 +3,12 @@ package movie
 import (
 	"context"
 	"errors"
-	metadatamodel "movie-micro/metadata/pkg/model"
-	"movie-micro/movie/internal/gateway"
-	"movie-micro/movie/pkg/model"
-	ratingmodel "movie-micro/rating/pkg/model"
 	"sync"
+
+	metadatamodel "github.com/Aditya-Chowdhary/micro-movies/metadata/pkg/model"
+	"github.com/Aditya-Chowdhary/micro-movies/movie/internal/gateway"
+	"github.com/Aditya-Chowdhary/micro-movies/movie/pkg/model"
+	ratingmodel "github.com/Aditya-Chowdhary/micro-movies/rating/pkg/model"
 )
 
 var ErrNotFound = errors.New("movie metadata not found")

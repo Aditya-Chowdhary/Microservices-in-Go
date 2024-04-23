@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"movie-micro/pkg/discovery"
 	"strconv"
 	"strings"
+
+	"github.com/Aditya-Chowdhary/micro-movies/pkg/discovery"
 
 	consul "github.com/hashicorp/consul/api"
 )

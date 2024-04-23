@@ -2,10 +2,11 @@ package grpc
 
 import (
 	"context"
-	"movie-micro/gen"
-	"movie-micro/internal/grpcutil"
-	"movie-micro/pkg/discovery"
-	"movie-micro/rating/pkg/model"
+
+	"github.com/Aditya-Chowdhary/micro-movies/gen"
+	"github.com/Aditya-Chowdhary/micro-movies/internal/grpcutil"
+	"github.com/Aditya-Chowdhary/micro-movies/pkg/discovery"
+	"github.com/Aditya-Chowdhary/micro-movies/rating/pkg/model"
 )
 
 // Gateway defines a gRPC gateway for a rating service

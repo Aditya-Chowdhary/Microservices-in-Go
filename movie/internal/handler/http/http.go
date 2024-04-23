@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
-	"movie-micro/movie/internal/controller/movie"
 	"net/http"
+
+	"github.com/Aditya-Chowdhary/micro-movies/movie/internal/controller/movie"
 )
 
 // Handler defines a movie handler

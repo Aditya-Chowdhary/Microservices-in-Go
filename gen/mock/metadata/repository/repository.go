@@ -11,7 +11,7 @@ package repository
 
 import (
 	context "context"
-	model "movie-micro/metadata/pkg/model"
+	model "github.com/Aditya-Chowdhary/micro-movies/metadata/pkg/model"
 	reflect "reflect"
 
 	gomock "go.uber.org/mock/gomock"

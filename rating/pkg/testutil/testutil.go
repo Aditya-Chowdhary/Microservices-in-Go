@@ -1,10 +1,10 @@
 package testutil
 
 import (
-	"movie-micro/gen"
-	"movie-micro/rating/internal/controller/rating"
-	grpchandler "movie-micro/rating/internal/handler/grpc"
-	"movie-micro/rating/internal/repository/memory"
+	"github.com/Aditya-Chowdhary/micro-movies/gen"
+	"github.com/Aditya-Chowdhary/micro-movies/rating/internal/controller/rating"
+	grpchandler "github.com/Aditya-Chowdhary/micro-movies/rating/internal/handler/grpc"
+	"github.com/Aditya-Chowdhary/micro-movies/rating/internal/repository/memory"
 )
 
 // NewTestRatingGRPCServer creates a new rating gRPC server for tests

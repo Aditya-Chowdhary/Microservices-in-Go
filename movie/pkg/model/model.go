@@ -1,6 +1,6 @@
 package model
 
-import "movie-micro/metadata/pkg/model"
+import "github.com/Aditya-Chowdhary/micro-movies/metadata/pkg/model"
 
 type MovieDetails struct {
 	Rating   *float64       `json:"rating,omitempty"`
