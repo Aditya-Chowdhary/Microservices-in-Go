@@ -6,7 +6,11 @@ import (
 
 	"movie-micro/metadata/internal/repository"
 	"movie-micro/metadata/pkg/model"
+
+	"go.opentelemetry.io/otel"
 )
+
+const tracerID = "metadata-repository-memory"
 
 type Repository struct {
 	sync.RWMutex
@@ -19,7 +23,10 @@ func New() *Repository {
 	}
 }
 
-func (r *Repository) Get(_ context.Context, id string) (*model.Metadata, error) {
+func (r *Repository) Get(ctx context.Context, id string) (*model.Metadata, error) {
+	_, span := otel.Tracer(tracerID).Start(ctx, "Repository/Get")
+	defer span.End()
+
 	r.RLock()
 	defer r.RUnlock()
 
@@ -30,7 +37,9 @@ func (r *Repository) Get(_ context.Context, id string) (*model.Metadata, error) 
 	return m, nil
 }
 
-func (r *Repository) Put(_ context.Context, id string, metadata *model.Metadata) error {
+func (r *Repository) Put(ctx context.Context, id string, metadata *model.Metadata) error {
+	_, span := otel.Tracer(tracerID).Start(ctx, "Repository/Put")
+	defer span.End()
 	r.Lock()
 	defer r.Unlock()
 	r.data[id] = metadata
